@@ -42,7 +42,7 @@ public class PluginConfig : PluginSdk.Config.PluginConfig, IPluginConfig
     [IntOption(0, int.MaxValue, "Maximum large grids per player. 0 disables this check.", Parent = "main-grid")]
     public int MaxLargeGridsPerPlayer { get; set => SetField(ref field, value); }
 
-    [StructOption(description: "Per-block limit rules.", Parent = "limit-rules")]
+    [ListOption(description: "Per-block limit rules.", Parent = "limit-rules")]
     public List<LimitRule> Limits { get; set => SetField(ref field, value); } = new List<LimitRule>();
 }
 
