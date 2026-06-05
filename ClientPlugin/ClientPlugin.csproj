@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>ClientPlugin</RootNamespace>
-    <AssemblyName>PluginTemplate</AssemblyName>
+    <AssemblyName>BlockLimits</AssemblyName>
     <LangVersion>14</LangVersion>
 
     <!-- Target platforms on Windows and Linux -->
@@ -50,6 +50,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="PluginSdk">
+      <HintPath>$(MagnetarBin)\PluginSdk.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="DirectShowLib, Version=2.1.0.1599, Culture=neutral, PublicKeyToken=null">
       <HintPath>$(Bin64)\DirectShowLib.dll</HintPath>
       <Private>False</Private>

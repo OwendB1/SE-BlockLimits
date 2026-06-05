@@ -1,7 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using HarmonyLib;
+using PluginSdk.Commands;
+using Sandbox.Game.Entities;
+using Sandbox.Game.Entities.Cube;
+using ServerPlugin.Commands;
 using Shared.Config;
 using Shared.Logging;
 using Shared.Patches;
@@ -15,10 +20,11 @@ namespace ServerPlugin;
 // ReSharper disable once UnusedType.Global
 public class Plugin : IPlugin, ICommonPlugin
 {
-    public const string Name = "PluginTemplate";
+    public const string Name = "BlockLimits";
     public static Plugin Instance { get; private set; }
 
     public long Tick { get; private set; }
+    public BlockLimitService Limits { get; private set; }
     private static bool failed;
 
     public IPluginLogger Log => Logger;
@@ -46,6 +52,10 @@ public class Plugin : IPlugin, ICommonPlugin
         var gameVersion = MyFinalBuildConstants.APP_VERSION_STRING.ToString();
         Common.SetPlugin(this, gameVersion, MyFileSystem.UserDataPath);
 
+        Limits = new BlockLimitService();
+        ServerCommands.Register(Assembly.GetExecutingAssembly(), typeof(BlockLimitCommands));
+        MyCubeGrids.BlockBuilt += OnBlockBuilt;
+
         if (!PatchHelpers.HarmonyPatchAll(Log, new Harmony(Name)))
         {
             failed = true;
@@ -61,12 +71,14 @@ public class Plugin : IPlugin, ICommonPlugin
         {
             // TODO: Save state and close resources here, called when the game exists (not guaranteed!)
             // IMPORTANT: Do NOT call harmony.UnpatchAll() here! It may break other plugins.
+            MyCubeGrids.BlockBuilt -= OnBlockBuilt;
         }
         catch (Exception ex)
         {
             Log.Critical(ex, "Dispose failed");
         }
 
+        Limits = null;
         Instance = null;
     }
 
@@ -94,7 +106,24 @@ public class Plugin : IPlugin, ICommonPlugin
 
     private void CustomUpdate()
     {
-        // TODO: Put your update code here. It is called on every simulation frame!
         PatchHelpers.PatchUpdates();
+
+        if (Tick % 600 == 0 && Config?.Enabled == true)
+            Limits?.Recalculate();
+    }
+
+    private void OnBlockBuilt(MyCubeGrid grid, MySlimBlock block)
+    {
+        if (Config?.Enabled != true || grid == null || block == null)
+            return;
+
+        long identityId = block.BuiltBy != 0 ? block.BuiltBy : block.OwnerId;
+        if (!Limits.CanAddBlock(grid, block.BlockDefinition, identityId, 1, out string limitName))
+        {
+            Log.Info("Removing block over limit '{0}': {1} on {2}", limitName, block.BlockDefinition.BlockPairName, grid.DisplayName);
+            grid.RemoveBlock(block);
+        }
+
+        Limits.Recalculate();
     }
 }

@@ -1,53 +1,100 @@
 #if !TORCH
 
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using PluginSdk.Config;
 
 namespace Shared.Config;
 
-public class PluginConfig : IPluginConfig
+[Tab("main", caption: "Main")]
+[Tab("limits", caption: "Limits")]
+[Section("main-core", "main", "Core")]
+[Section("main-grid", "main", "Grid Counts")]
+[Section("limit-rules", "limits", "Rules")]
+public class PluginConfig : PluginSdk.Config.PluginConfig, IPluginConfig
 {
-    public event PropertyChangedEventHandler PropertyChanged;
+    [BoolOption("Enable BlockLimits enforcement and API.", Parent = "main-core")]
+    public bool Enabled { get; set => SetField(ref field, value); } = true;
 
-    private void SetValue<T>(ref T field, T value, [CallerMemberName] string propName = "")
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value))
-            return;
+    [BoolOption("Verify patched game methods before applying Harmony patches.", Parent = "main-core")]
+    public bool DetectCodeChanges { get; set => SetField(ref field, value); } = true;
 
-        field = value;
+    [BoolOption("Import vanilla block type limits into BlockLimits checks.", Parent = "main-core")]
+    public bool UseVanillaLimits { get; set => SetField(ref field, value); }
 
-        OnPropertyChanged(propName);
-    }
+    [StringOption(description: "Message returned when a block limit is reached. {BL}=block names, {BC}=count.", Parent = "main-core")]
+    public string DenyMessage { get; set => SetField(ref field, value); } = "Limit reached: {BC} blocks denied. BlockNames: {BL}";
 
-    private void OnPropertyChanged([CallerMemberName] string propName = "")
-    {
-        PropertyChangedEventHandler propertyChanged = PropertyChanged;
-        if (propertyChanged == null)
-            return;
+    [IntOption(0, int.MaxValue, "Maximum blocks on small grids. 0 disables this check.", Parent = "main-grid")]
+    public int MaxBlocksSmallGrid { get; set => SetField(ref field, value); }
 
-        propertyChanged(this, new PropertyChangedEventArgs(propName));
-    }
+    [IntOption(0, int.MaxValue, "Maximum blocks on large grids. 0 disables this check.", Parent = "main-grid")]
+    public int MaxBlocksLargeGrid { get; set => SetField(ref field, value); }
 
-    private bool enabled = true;
-    private bool detectCodeChanges = true;
-    // TODO: Implement your config fields here
-    // The default values here will apply to Client and Dedicated.
-    // The default values for Torch are defined in TorchPlugin.
+    [IntOption(0, int.MaxValue, "Maximum blocks on dynamic grids. 0 disables this check.", Parent = "main-grid")]
+    public int MaxBlockSizeShips { get; set => SetField(ref field, value); }
 
-    public bool Enabled
-    {
-        get => enabled;
-        set => SetValue(ref enabled, value);
-    }
+    [IntOption(0, int.MaxValue, "Maximum blocks on static grids. 0 disables this check.", Parent = "main-grid")]
+    public int MaxBlockSizeStations { get; set => SetField(ref field, value); }
 
-    public bool DetectCodeChanges
-    {
-        get => detectCodeChanges;
-        set => SetValue(ref detectCodeChanges, value);
-    }
+    [IntOption(0, int.MaxValue, "Maximum small grids per player. 0 disables this check.", Parent = "main-grid")]
+    public int MaxSmallGridsPerPlayer { get; set => SetField(ref field, value); }
 
-    // TODO: Encapsulate your config fields as properties here
+    [IntOption(0, int.MaxValue, "Maximum large grids per player. 0 disables this check.", Parent = "main-grid")]
+    public int MaxLargeGridsPerPlayer { get; set => SetField(ref field, value); }
+
+    [StructOption(description: "Per-block limit rules.", Parent = "limit-rules")]
+    public List<LimitRule> Limits { get; set => SetField(ref field, value); } = new List<LimitRule>();
+}
+
+public struct LimitRule
+{
+    [StructMember("Friendly name shown in reports.")]
+    [StructCaption]
+    public string Name { get; set; }
+
+    [StructMember("Block type id, subtype id, or block pair name. Empty matches nothing.")]
+    public List<string> BlockList { get; set; }
+
+    [StructMember("How block names are matched.")]
+    public BlockListSearchType SearchType { get; set; }
+
+    [StructMember("Allowed count.")]
+    public int Limit { get; set; }
+
+    [StructMember("Apply this rule to player built-by counts.")]
+    public bool LimitPlayers { get; set; }
+
+    [StructMember("Apply this rule to faction counts.")]
+    public bool LimitFaction { get; set; }
+
+    [StructMember("Apply this rule to individual grids.")]
+    public bool LimitGrids { get; set; }
+
+    [StructMember("Grid type filter.")]
+    public GridType GridType { get; set; }
+
+    [StructMember("Player, faction, or grid identity/entity ids ignored by this rule.")]
+    public List<string> Exceptions { get; set; }
+
+    [StructMember("Ignore NPC-owned blocks.")]
+    public bool IgnoreNpcs { get; set; }
+}
+
+public enum BlockListSearchType
+{
+    Auto,
+    TypeId,
+    SubtypeId,
+    BlockPairName,
+}
+
+public enum GridType
+{
+    AllGrids,
+    SmallGrid,
+    LargeGrid,
+    Static,
+    Ship,
 }
 
 #endif
