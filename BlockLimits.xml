@@ -5,24 +5,19 @@
     <Id>9103FB18-9813-4B64-9D87-A58434266D93</Id>
 
     <!-- GitHub repository ID -->
-    <RepoId>todo-github-user/project-name</RepoId>
+    <RepoId>OwendB1/BlockLimits</RepoId>
 
     <!-- The name of your plugin that will appear in the plugin list -->
-    <FriendlyName>TODO BlockLimitsServer</FriendlyName>
+    <FriendlyName>BlockLimits</FriendlyName>
 
     <!-- The author name that you want to appear in the plugin list -->
-    <Author>TODO Author Name</Author>
+    <Author>OwendB</Author>
 
     <!-- Optional tooltip for the plugin in the plugin list -->
-    <Tooltip>TODO Short description</Tooltip>
+    <Tooltip>PluginSDK rewrite of the Torch BlockLimiter for Magnetar.</Tooltip>
 
     <!-- Optional plugin description. If omitted, this will be the same as the Tooltip. 1000 characters max. -->
-    <Description>TODO Long description, multiple lines.
-
-        This text is shown on the plugin details panel in a scrollable text box.
-
-        You can use links here, players can click on them. For example, add a Discord invite.
-    </Description>
+    <Description>BlockLimits is a Space Engineers dedicated server plugin for Magnetar — a PluginSDK rewrite of the old Torch BlockLimiter. It enforces block limit rules by player, faction, and grid, supports grid size limits, optional vanilla block type limit import, the !blocklimit chat commands, and exposes a cross-plugin API (BlockLimits.PluginApi.Limits.CanAdd) for other plugins to gate block placement. Nexus synchronization from the Torch plugin is intentionally not included.</Description>
 
     <!-- Only source code in the Directory entries listed in SourceDirectories is compiled. Exclude any test projects or similar. -->
     <SourceDirectories>
