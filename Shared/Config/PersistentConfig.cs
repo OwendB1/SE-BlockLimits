@@ -1,8 +1,8 @@
 using System;
 using System.ComponentModel;
-using System.Xml.Serialization;
 using System.IO;
 using System.Threading;
+using PluginSdk.Config;
 using Shared.Logging;
 
 namespace Shared.Config;
@@ -11,7 +11,7 @@ namespace Shared.Config;
 // Simple class that manages saving <see cref="P:Torch.Persistent`1.Data" /> to disk using XML serialization.
 // Can automatically save on changes by implementing <see cref="T:System.ComponentModel.INotifyPropertyChanged" /> in the data class.
 /// <typeparam name="T">Data class type</typeparam>
-public class PersistentConfig<T> : IDisposable where T : class, INotifyPropertyChanged, new()
+public class PersistentConfig<T> : IDisposable where T : PluginSdk.Config.PluginConfig, INotifyPropertyChanged, new()
 {
     private T data;
     private Timer saveConfigTimer;
@@ -56,9 +56,7 @@ public class PersistentConfig<T> : IDisposable where T : class, INotifyPropertyC
         {
             if (File.Exists(path))
             {
-                var xmlSerializer = new XmlSerializer(typeof(T));
-                using (var streamReader = File.OpenText(path))
-                    return new PersistentConfig<T>(path, (T)xmlSerializer.Deserialize(streamReader));
+                return new PersistentConfig<T>(path, ConfigStorage.LoadXml<T>(path));
             }
         }
         catch (Exception e)
@@ -91,8 +89,7 @@ public class PersistentConfig<T> : IDisposable where T : class, INotifyPropertyC
         // NOTE: There is a minimal chance of inconsistency here if the config data
         // is changed concurrently, but it is negligible in practice. Also, it would be
         // corrected by the next scheduled save operation after SaveDelay milliseconds.
-        using (var text = File.CreateText(path))
-            new XmlSerializer(typeof(T)).Serialize(text, Data);
+        ConfigStorage.SaveXml(Data, path);
     }
 
     public void Dispose()

@@ -30,7 +30,8 @@ public class Plugin : IPlugin, ICommonPlugin
     public IPluginLogger Log => Logger;
     private static readonly IPluginLogger Logger = new PluginLogger(Name);
 
-    public IPluginConfig Config => config?.Data;
+    public PluginConfig PluginConfig => config?.Data;
+    public IPluginConfig Config => PluginConfig;
     private PersistentConfig<PluginConfig> config;
     private static readonly string ConfigFileName = $"{Name}.cfg";
 
