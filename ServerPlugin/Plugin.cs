@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Threading;
 using HarmonyLib;
 using PluginSdk.Commands;
+using Sandbox.Definitions;
+using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Cube;
 using ServerPlugin.Commands;
@@ -122,9 +124,37 @@ public class Plugin : IPlugin, ICommonPlugin
         if (!Limits.CanAddBlock(grid, block.BlockDefinition, identityId, 1, out string limitName))
         {
             Log.Info("Removing block over limit '{0}': {1} on {2}", limitName, block.BlockDefinition.BlockPairName, grid.DisplayName);
+            NotifyPlacementBlocked(identityId, block.BlockDefinition, limitName);
             grid.RemoveBlock(block);
         }
 
         Limits.Recalculate();
+    }
+
+    private void NotifyPlacementBlocked(long identityId, MyCubeBlockDefinition definition, string limitName)
+    {
+        if (identityId == 0 || definition == null)
+            return;
+
+        try
+        {
+            string blockName = string.IsNullOrWhiteSpace(definition.BlockPairName)
+                ? definition.Id.SubtypeName
+                : definition.BlockPairName;
+            string message = string.IsNullOrWhiteSpace(Config?.DenyMessage)
+                ? "Limit reached: {BC} blocks denied. BlockNames: {BL}"
+                : Config.DenyMessage;
+
+            message = message
+                .Replace("{BC}", "1")
+                .Replace("{BL}", blockName)
+                .Replace("{LIMIT}", limitName ?? "Block limit");
+
+            MyVisualScriptLogicProvider.SendChatMessage(message, Name, identityId);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to send block limit denial message");
+        }
     }
 }
