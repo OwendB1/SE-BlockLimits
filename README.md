@@ -28,3 +28,6 @@ Build with:
 ```bash
 dotnet build BlockLimits.sln -c Release
 ```
+
+Functionality is inspired by and reimplements the original Torch plugin
+BlockLimiter by N1Ran: https://github.com/N1Ran/BlockLimiter
