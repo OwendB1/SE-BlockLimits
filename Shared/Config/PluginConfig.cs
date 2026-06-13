@@ -1,5 +1,3 @@
-#if !TORCH
-
 using System.Collections.Generic;
 using PluginSdk.Config;
 
@@ -96,5 +94,3 @@ public enum GridType
     Static,
     Ship,
 }
-
-#endif
