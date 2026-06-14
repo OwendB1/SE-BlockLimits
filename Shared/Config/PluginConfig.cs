@@ -13,9 +13,6 @@ public class PluginConfig : PluginSdk.Config.PluginConfig, IPluginConfig
     [BoolOption("Enable BlockLimits enforcement and API.", Parent = "main-core")]
     public bool Enabled { get; set => SetField(ref field, value); } = true;
 
-    [BoolOption("Verify patched game methods before applying Harmony patches.", Parent = "main-core")]
-    public bool DetectCodeChanges { get; set => SetField(ref field, value); } = true;
-
     [BoolOption("Import vanilla block type limits into BlockLimits checks.", Parent = "main-core")]
     public bool UseVanillaLimits { get; set => SetField(ref field, value); }
 
