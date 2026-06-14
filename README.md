@@ -29,5 +29,14 @@ Build with:
 dotnet build BlockLimits.sln -c Release
 ```
 
+The plugin version lives in `Version.Build.props` (committed, imported by `Directory.Build.props`).
+Bump the version there.
+
+`Directory.Build.props.template` is a template for `Directory.Build.props`, a local, **not
+committed** config file you can use to override the reference folder paths (`Bin64`, `Pulsar`,
+`Magnetar`, `Dedicated64`). Running `setup.py` copies the template to `Directory.Build.props`
+if it does not exist yet and fills in the auto-detected paths. Leaving a path empty falls back
+to the platform-specific auto-detection (Windows and Linux) further down in the file.
+
 Functionality is inspired by and reimplements the original Torch plugin
 BlockLimiter by N1Ran: https://github.com/N1Ran/BlockLimiter
